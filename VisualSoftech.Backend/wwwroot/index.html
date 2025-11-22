@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Students | Visual Softech</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body {
+            background: #f7f7f7;
+        }
+
+        .table img {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem("loggedIn") !== "true") {
+            window.location.href = "login.html";
+        }
+    </script>
+
+    <div class="container mt-4">
+
+        <div class="d-flex justify-content-between mb-3">
+            <h3>Students</h3>
+
+            <div>
+                <a href="create.html" class="btn btn-success">Add Student</a>
+                <button class="btn btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <table class="table table-bordered shadow-sm bg-white" id="studentsTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Address</th>
+                    <th>State</th>
+                    <th>Phone</th>
+                    <th>Photo</th>
+                    <th width="140">Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <nav>
+            <ul class="pagination" id="pagination"></ul>
+        </nav>
+
+    </div>
+
+    <!--<script>
+
+        const apiBase = "/api";
+        
+        let token = localStorage.getItem("token");
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
+        
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+        }
+
+        
+        function loadStudents(page = 1) {
+
+            let token = localStorage.getItem("token");
+
+            if (!token) {
+                logout();
+                return;
+            }
+
+            $.ajax({
+                url: `${apiBase}/students/list?page=${page}&pageSize=10`,
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                },
+                success: function (res) {
+                    console.log("Students list response =", res);
+
+                    let rows = "";
+
+                    res.forEach(s => {
+                        let photoHtml = "";
+
+                        try {
+                            let arr = JSON.parse(s.photos_json || "[]");
+                            if (arr.length > 0) {
+                                photoHtml = `<img src="${arr[0]}" />`;
+                            }
+                        } catch (e) { }
+
+                        rows += `
+                    <tr>
+                        <td>${s.name}</td>
+                        <td>${s.age}</td>
+                        <td>${s.address ?? ""}</td>
+                        <td>${s.state_name ?? ""}</td>
+                        <td>${s.phone_number ?? ""}</td>
+                        <td>${photoHtml}</td>
+                        <td>
+                            <a class="btn btn-sm btn-primary me-1" href="edit.html?id=${s.id}">Edit</a>
+                            <button class="btn btn-sm btn-danger" onclick="deleteStudent(${s.id})">Delete</button>
+                        </td>
+                    </tr>`;
+                    });
+
+                    $("#studentsTable tbody").html(rows);
+                },
+                error: function (err) {
+                    console.log("ERROR loading students:", err);
+
+                    if (err.status === 401 || err.status === 403) {
+                        Swal.fire("Session expired", "Please login again", "warning")
+                            .then(() => logout());
+                    }
+                }
+            });
+        }
+
+
+        
+        function deleteStudent(id) {
+
+            Swal.fire({
+                title: "Confirm Delete",
+                text: "Are you sure?",
+                icon: "warning",
+                showCancelButton: true
+            }).then((res) => {
+                if (res.isConfirmed) {
+
+                    $.ajax({
+                        url: `${apiBase}/students/${id}`,
+                        method: "DELETE",
+                        headers: {
+                            "Authorization": "Bearer " + token
+                        },
+                        success: function () {
+                            Swal.fire("Deleted", "Student removed", "success");
+                            loadStudents();
+                        },
+                        error: function (err) {
+                            if (err.status === 401 || err.status === 403) {
+                                Swal.fire("Session expired", "Please login again", "warning")
+                                    .then(() => logout());
+                            } else {
+                                Swal.fire("Error", "Delete failed", "error");
+                            }
+                        }
+                    });
+
+                }
+            });
+        }
+
+        
+        loadStudents();
+
+    </script>-->
+    <script>
+        const apiBase = window.location.origin + "/api";
+
+        function logout() {
+            Swal.fire("Authentication Removed", "Login system disabled", "info");
+        }
+
+        function loadStudents(page = 1) {
+
+            $.ajax({
+                url: `${apiBase}/students/list?page=${page}&pageSize=10`,
+                method: "GET",
+                success: function (res) {
+
+                    let rows = "";
+
+                    res.forEach(s => {
+                        let photoHtml = "";
+                        try {
+                            let arr = JSON.parse(s.photos_json || "[]");
+                            if (arr.length > 0) {
+                                photoHtml = `<img src="${arr[0]}" />`;
+                            }
+                        } catch { }
+
+                        rows += `
+                                <tr>
+                                    <td>${s.name}</td>
+                                    <td>${s.age}</td>
+                                    <td>${s.address ?? ""}</td>
+                                    <td>${s.state_name ?? ""}</td>
+                                    <td>${s.phone_number ?? ""}</td>
+                                    <td>${photoHtml}</td>
+                                    <td>
+                                        <a class="btn btn-sm btn-primary me-1" href="edit.html?id=${s.id}">Edit</a>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteStudent(${s.id})">Delete</button>
+                                    </td>
+                                </tr>`;
+                    });
+
+                    $("#studentsTable tbody").html(rows);
+                }
+            });
+        }
+
+        function deleteStudent(id) {
+
+            Swal.fire({
+                title: "Confirm Delete",
+                text: "Are you sure?",
+                icon: "warning",
+                showCancelButton: true
+            }).then((res) => {
+
+                if (res.isConfirmed) {
+
+                    $.ajax({
+                        url: `${apiBase}/students/${id}`,
+                        method: "DELETE",
+                        success: function () {
+                            Swal.fire("Deleted", "Student removed", "success");
+                            loadStudents();
+                        }
+                    });
+                }
+            });
+        }
+        function logout() {
+            localStorage.removeItem("loggedIn");
+            window.location.href = "login.html";
+        }
+
+
+        loadStudents();
+    </script>
+
+
+</body>
+</html>

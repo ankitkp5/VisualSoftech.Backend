@@ -1,7 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Services;
+﻿using Microsoft.OpenApi.Models;
 
 namespace VisualSoftech.Backend
 {
@@ -11,7 +8,16 @@ namespace VisualSoftech.Backend
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // CORS for frontend
+            // App listening URLs
+            builder.WebHost.UseUrls(
+                "http://0.0.0.0:5160",
+                "https://0.0.0.0:7296",
+                "https://localhost:7296",
+                "http://localhost:5160"
+            );
+
+            
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
@@ -22,58 +28,33 @@ namespace VisualSoftech.Backend
                 });
             });
 
-            // Controllers
             builder.Services.AddControllers();
-
-            // Swagger
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
 
-            // JWT Settings
-            var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-            var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
-
-            // JWT Authentication
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-
-                        ValidIssuer = jwtSettings["Issuer"],
-                        ValidAudience = jwtSettings["Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(key)
-                    };
+                    Title = "VisualSoftech.Backend",
+                    Version = "v1"
                 });
-
-            // JWT Token Generator Service
-            builder.Services.AddSingleton(new JwtService(
-                jwtSettings["Key"],
-                jwtSettings["Issuer"],
-                jwtSettings["Audience"],
-                int.Parse(jwtSettings["ExpiryMinutes"])
-            ));
+            });
 
             var app = builder.Build();
 
-            // Swagger (always enabled)
+            
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+            app.UseCors("AllowAll");
+
+           
             app.UseSwagger();
             app.UseSwaggerUI();
 
-            app.UseHttpsRedirection();
-
-            // CORS
-            app.UseCors("AllowAll");
-
-            // Authentication & Authorization
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            // Map Controllers
+            
             app.MapControllers();
 
             app.Run();

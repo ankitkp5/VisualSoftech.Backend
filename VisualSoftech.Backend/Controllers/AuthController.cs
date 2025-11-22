@@ -1,10 +1,7 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using System.Data;
 using Microsoft.Data.SqlClient;
 using VisualSoftech.Backend.Models;
-using Services;
 
 namespace VisualSoftech.Backend.Controllers
 {
@@ -13,15 +10,12 @@ namespace VisualSoftech.Backend.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;
-        private readonly JwtService _jwt;
 
-        public AuthController(IConfiguration config, JwtService jwt)
+        public AuthController(IConfiguration config)
         {
             _config = config;
-            _jwt = jwt;
         }
 
-        // POST: api/auth/login
         [HttpPost("login")]
         public IActionResult Login([FromBody] UserModel user)
         {
@@ -43,8 +37,7 @@ namespace VisualSoftech.Backend.Controllers
 
                 if (isValid == 1)
                 {
-                    string token = _jwt.GenerateToken(user.Username);
-                    return Ok(new { token });
+                    return Ok(new { success = true });
                 }
                 else
                 {

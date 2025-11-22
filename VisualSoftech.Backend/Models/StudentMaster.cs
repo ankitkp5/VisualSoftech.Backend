@@ -23,7 +23,6 @@
         public List<StudentDetail> Subjects { get; set; }
     }
 }
-//using System;
-//using System.Collections.Generic;
+
 
 

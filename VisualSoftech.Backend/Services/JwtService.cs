@@ -23,29 +23,27 @@ namespace Services
 
         public string GenerateToken(string username)
         {
-            // Security key
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
-
-            // Credentials
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            // Claims (you can add more whenever needed)
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, username)
-            };
+        new Claim(ClaimTypes.Name, username)
+    };
 
-            // Token structure
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var now = DateTime.UtcNow;
+
             var token = new JwtSecurityToken(
                 issuer: _issuer,
                 audience: _audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_expiryMinutes),
+                notBefore: now,
+                expires: now.AddMinutes(_expiryMinutes),
                 signingCredentials: credentials
             );
 
-            // Write token
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
     }
 }
