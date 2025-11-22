@@ -1,0 +1,86 @@
+CREATE DATABASE visual_softech_db;
+USE visual_softech_db;
+
+IF OBJECT_ID('users', 'U') IS NOT NULL DROP TABLE users;
+GO
+CREATE TABLE users (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(200) NOT NULL
+);
+GO
+INSERT INTO users (username, password) VALUES ('admin', 'admin123');
+GO
+
+IF OBJECT_ID('state_name', 'U') IS NOT NULL DROP TABLE state_name;
+GO
+CREATE TABLE state_name (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    state_name VARCHAR(150) NOT NULL
+);
+GO
+INSERT INTO state_name (state_name) VALUES
+('Andhra Pradesh'),
+('Arunachal Pradesh'),
+('Assam'),
+('Bihar'),
+('Chhattisgarh'),
+('Goa'),
+('Gujarat'),
+('Haryana'),
+('Himachal Pradesh'),
+('Jharkhand'),
+('Karnataka'),
+('Kerala'),
+('Madhya Pradesh'),
+('Maharashtra'),
+('Manipur'),
+('Meghalaya'),
+('Mizoram'),
+('Nagaland'),
+('Odisha'),
+('Punjab'),
+('Rajasthan'),
+('Sikkim'),
+('Tamil Nadu'),
+('Telangana'),
+('Tripura'),
+('Uttar Pradesh'),
+('Uttarakhand'),
+('West Bengal');
+GO
+
+IF OBJECT_ID('student_master', 'U') IS NOT NULL DROP TABLE student_master;
+GO
+CREATE TABLE student_master (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name VARCHAR(200) NOT NULL,
+    age INT NOT NULL,
+    dob DATE NOT NULL,
+    address VARCHAR(500) NULL,
+    state_id INT NOT NULL,
+    phone_number VARCHAR(30) NULL,
+    photos_json VARCHAR(MAX) NULL,
+    CONSTRAINT FK_student_state FOREIGN KEY (state_id) REFERENCES state_name(id)
+);
+GO
+
+IF OBJECT_ID('student_detail', 'U') IS NOT NULL DROP TABLE student_detail;
+GO
+CREATE TABLE student_detail (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    student_master_id INT NOT NULL,
+    subject_name VARCHAR(200) NOT NULL,
+    CONSTRAINT FK_student_master FOREIGN KEY (student_master_id)
+        REFERENCES student_master(id)
+        ON DELETE CASCADE
+);
+GO
+
+INSERT INTO student_master (name, age, dob, address, state_id, phone_number, photos_json)
+VALUES ('Aarav Sharma', 18, '2024-22-02', 'noida', 1, '+91876556745', '[]');
+GO
+
+INSERT INTO student_detail (student_master_id, subject_name)
+VALUES (1, 'Math'), (1, 'Physics');
+GO
